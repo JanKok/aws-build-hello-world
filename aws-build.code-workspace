@@ -1,0 +1,80 @@
+{
+  "folders": [
+    {
+      "path": "../aws-build-utils"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../hello-world-example"
+    },
+    {
+      "path": "../smartcam"
+    },
+    {
+      "path": "../aws-build-kria-smartcam"
+    }
+  ],
+  "settings": {},
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Create EC2 Instance (first-time setup)",
+        "type": "shell",
+        "command": "${workspaceFolder}/create-instance.sh"
+      },
+      {
+        "label": "Build on EC2",
+        "type": "shell",
+        "command": "${workspaceFolder}/build.sh",
+        "group": { "kind": "build", "isDefault": true },
+        "presentation": { "panel": "shared" }
+      },
+      {
+        "label": "Build locally",
+        "type": "shell",
+        "command": "${workspaceFolder}/local-build.sh",
+        "group": "build",
+        "presentation": { "panel": "shared" }
+      },
+      {
+        "label": "Deploy locally",
+        "type": "shell",
+        "command": "${workspaceFolder}/deploy.sh",
+        "group": "test"
+      },
+      {
+        "label": "Start EC2",
+        "type": "shell",
+        "command": "${workspaceFolder}/start.sh"
+      },
+      {
+        "label": "Stop EC2",
+        "type": "shell",
+        "command": "${workspaceFolder}/stop.sh"
+      },
+      {
+        "label": "Resize EC2 Instance",
+        "type": "shell",
+        "command": "${workspaceFolder}/resize-instance.sh ${input:helloInstanceType}"
+      }
+    ],
+    "inputs": [
+      {
+        "id": "helloInstanceType",
+        "type": "pickString",
+        "description": "EC2 instance type",
+        "options": [
+          { "label": "t3.micro  —  2 vCPU,  1 GB,  $0.0104/hr", "value": "t3.micro" },
+          { "label": "t3.small  —  2 vCPU,  2 GB,  $0.0208/hr", "value": "t3.small" },
+          { "label": "t3.medium —  2 vCPU,  4 GB,  $0.0416/hr", "value": "t3.medium" },
+          { "label": "t3.large  —  2 vCPU,  8 GB,  $0.0832/hr", "value": "t3.large" },
+          { "label": "t3.xlarge —  4 vCPU, 16 GB,  $0.1664/hr", "value": "t3.xlarge" }
+        ],
+        "default": "t3.micro"
+      }
+    ]
+  }
+}
