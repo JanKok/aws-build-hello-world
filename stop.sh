@@ -4,4 +4,4 @@
 set -e
 
 source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
-"$AWS_PATH/stop.sh"
+"$AWS_BUILD_UTILS/stop.sh"

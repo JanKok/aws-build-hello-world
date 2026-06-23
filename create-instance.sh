@@ -5,31 +5,24 @@
 # To force a fresh AMI lookup, delete .state/ami-id.
 set -e
 
-source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
-source "$AWS_PATH/args.sh" "$@"
+AWS_BUILD_CONFIG="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$AWS_BUILD_CONFIG/config.sh"
+source "$AWS_BUILD_UTILS/args.sh" "$@"
 
-if [ -f "$STATE_DIR/ami-id" ]; then
-  AMI_ID=$(cat "$STATE_DIR/ami-id")
-  echo "Using saved AMI: $AMI_ID"
-else
-  echo "Fetching latest Ubuntu 22.04 AMI for $AWS_REGION..."
-  AMI_ID=$(aws ec2 describe-images \
-    --owners 099720109477 \
-    --filters \
-      'Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*' \
-      'Name=state,Values=available' \
-    --query 'sort_by(Images,&CreationDate)[-1].ImageId' \
-    --output text \
-    --region "$AWS_REGION")
-  mkdir -p "$STATE_DIR"
-  echo "$AMI_ID" > "$STATE_DIR/ami-id"
-  echo "Resolved and saved AMI: $AMI_ID  (delete .state/ami-id to re-fetch)"
-fi
+# Get the AMI (Amazon Machine Image) ID to use for the EC2 instance. This is the
+# image that will be used to create the instance, and it should have the
+# necessary environment and dependencies for the build process. The
+# get-ami-id.sh script contains logic to either use a hardcoded AMI ID, reuse a
+# previously saved AMI ID, or fetch the latest suitable AMI from AWS based on
+# specified criteria. After this script runs, the AMI_ID variable will be set
+# and ready to use for launching the instance.
+source "$AWS_BUILD_CONFIG/get-ami-id.sh"
 
-"$AWS_PATH/launch.sh"
+echo "=== Launching instance with AMI: $AMI_ID ==="
+"$AWS_BUILD_UTILS/launch.sh"
 
 echo "=== Stopping instance after setup ==="
-"$AWS_PATH/stop.sh"
+"$AWS_BUILD_UTILS/stop.sh"
 
 echo ""
 echo "Instance created. ID saved to $STATE_DIR/instance-id"
